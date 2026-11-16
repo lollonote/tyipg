@@ -1,0 +1,840 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wikipedia 無限タイピング</title>
+<style>
+:root {
+    color-scheme: dark;
+    --bg: #080d12;
+    --panel: #111a22;
+    --line: #294139;
+    --text: #e8f2ee;
+    --muted: #82948d;
+    --green: #65e6ae;
+    --green-bright: #a8ffd5;
+    --gold: #e8c96e;
+    --question-size: 32px;
+    --answer-size: 32px;
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+    margin: 0;
+    padding: clamp(6px, 1.2vh, 12px) 14px;
+    height: 100vh;
+    height: 100dvh;
+    overflow: hidden;
+    background: var(--bg);
+    color: var(--text);
+    font-family: "Yu Gothic", "Meiryo", sans-serif;
+    text-align: center;
+    position: relative;
+}
+
+.layout {
+    width: min(1160px, 100%);
+    height: 100%;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 230px;
+    gap: 12px;
+    min-height: 0;
+}
+
+.main-area {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: clamp(5px, 0.9vh, 10px);
+    min-height: 0;
+}
+
+.top-header {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    text-align: left;
+}
+.title-group h1 {
+    margin: 0;
+    color: var(--green);
+    font-size: clamp(20px, 3vw, 27px);
+    line-height: 1.15;
+}
+.subtitle {
+    margin: 2px 0 0;
+    color: var(--muted);
+    font-size: 12px;
+}
+.appearance-controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+}
+.palette-control {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--muted);
+    font-size: 12px;
+}
+.palette-control select {
+    padding: 6px 8px;
+    color: var(--text);
+    background: #0b141a;
+    border: 1px solid #34515a;
+    border-radius: 7px;
+    font: inherit;
+}
+#themeToggle {
+    margin: 0;
+    padding: 6px 11px;
+    font-size: 12px;
+}
+
+.skip-hint {
+    flex: 0 0 auto;
+    padding: 7px 12px;
+    color: var(--text);
+    background: color-mix(in srgb, var(--accent) 11%, var(--panel));
+    border: 1px solid var(--accent-border);
+    border-radius: 9px;
+    text-align: left;
+    font-size: 12px;
+    line-height: 1.4;
+}
+.skip-hint strong, .skip-hint b { color: var(--accent); }
+
+.stats {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    margin: 0;
+    flex: 0 0 auto;
+}
+.stat {
+    padding: 6px 10px;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+}
+.stat-label { color: var(--muted); font-size: 11px; }
+.stat-value {
+    margin-top: 1px;
+    color: var(--green);
+    font-size: clamp(19px, 2.8vh, 24px);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+.stat-unit { color: var(--muted); font-size: 11px; font-weight: 400; }
+
+.question-box {
+    display: flex;
+    flex: 1 1 0;
+    min-height: 64px;
+    flex-direction: column;
+    justify-content: center;
+    margin: 0;
+    padding: clamp(8px, 1.4vh, 16px) 16px;
+    overflow: hidden;
+    background: var(--panel);
+    border: 1px solid #293e49;
+    border-radius: 13px;
+}
+.question-label {
+    flex: 0 0 auto;
+    margin-bottom: 4px;
+    color: #8ba9b5;
+    font-size: 12px;
+}
+.question {
+    font-size: var(--question-size);
+    line-height: 1.35;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    word-break: break-all;
+}
+.correct { color: var(--green); }
+.wrong { color: #ff7b8a; text-decoration: underline wavy #ff7b8a; }
+.current { border-bottom: 3px solid var(--green); }
+
+.graph-box {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 0;
+    min-height: 95px;
+    margin: 0;
+    padding: 7px 11px 5px;
+    text-align: left;
+    background: rgba(12, 20, 24, .97);
+    border: 1px solid #315746;
+    border-radius: 12px;
+    box-shadow: 0 8px 26px rgba(0,0,0,.30);
+    overflow: hidden;
+}
+.graph-header {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 4px;
+}
+.graph-title { color: var(--green-bright); font-size: 12px; font-weight: 700; letter-spacing: 1.2px; }
+.graph-description { margin-top: 2px; color: var(--muted); font-size: 10px; }
+.graph-badge {
+    flex: 0 0 auto;
+    padding: 3px 8px;
+    color: var(--green);
+    border: 1px solid #32694e;
+    border-radius: 20px;
+    font-size: 9px;
+    letter-spacing: 1px;
+}
+.canvas-wrap {
+    flex: 1 1 0;
+    min-height: 0;
+    width: 100%;
+    position: relative;
+}
+#speedGraph {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+.graph-legend {
+    flex: 0 0 auto;
+    margin-top: 2px;
+    color: var(--muted);
+    text-align: right;
+    font-size: 10px;
+}
+.graph-legend .green { color: var(--green); }
+.graph-legend .gold { margin-left: 10px; color: var(--gold); }
+
+.typing-area {
+    margin: 0;
+    flex: 0.85 1 0;
+    min-height: 54px;
+    display: flex;
+}
+#answer {
+    display: block;
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+    padding: 8px 12px;
+    color: #effff7;
+    background: #121e26;
+    border: 2px solid #34515a;
+    border-radius: 10px;
+    outline: none;
+    font-family: inherit;
+    font-size: var(--answer-size);
+    line-height: 1.3;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    word-break: break-all;
+    resize: none;
+}
+#answer:focus { border-color: var(--green); box-shadow: 0 0 0 3px rgba(101,230,174,.09); }
+#answer:disabled { opacity: .55; }
+
+.bottom-bar {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    min-height: 18px;
+}
+.message {
+    margin: 0;
+    color: var(--green);
+    font-size: 12px;
+    text-align: left;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* 画面内のわかるけどあまり目立たない場所に配置したクレジット表記（kure.textの内容） */
+.credit-footer {
+    font-size: 11px;
+    color: var(--muted);
+    opacity: 0.7;
+    letter-spacing: 0.3px;
+    margin: 0;
+    text-align: right;
+}
+.credit-footer:hover {
+    opacity: 1;
+}
+
+.sidebar {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 14px 12px;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 13px;
+    text-align: left;
+    min-height: 0;
+}
+.sidebar-section {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+.sidebar-title {
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--line);
+    color: var(--accent);
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+.setting label {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 4px;
+    color: var(--muted);
+    font-size: 12px;
+}
+.setting label span {
+    color: var(--text);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+.setting input[type="range"] {
+    width: 100%;
+    accent-color: var(--accent);
+    cursor: pointer;
+}
+.sidebar-footer {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+button {
+    margin: 0;
+    padding: 9px 14px;
+    color: #f2fff8;
+    background: #176b50;
+    border: 1px solid #318568;
+    border-radius: 8px;
+    font: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+}
+button:hover { background: #218b67; }
+#resetButton {
+    width: 100%;
+}
+
+body.light-mode {
+    color-scheme: light;
+    --bg:#f1f5f7; --panel:#ffffff; --line:#cbd8df; --text:#1b2932; --muted:#647783;
+    background:var(--bg); color:var(--text);
+}
+body.light-mode .question-box, body.light-mode .stat, body.light-mode .sidebar {
+    background:var(--panel); border-color:var(--line);
+}
+body.light-mode .graph-box {
+    background:#fff; border-color:var(--line); box-shadow:0 8px 24px rgba(35,58,70,.10);
+}
+body.light-mode #answer, body.light-mode .palette-control select {
+    color:var(--text); background:#f7fafb; border-color:#bdcbd2;
+}
+body.light-mode .question-label { color:#536d7b; }
+body.light-mode .graph-description, body.light-mode .graph-legend { color:var(--muted); }
+
+:root { --accent:#65e6ae; --accent-strong:#a8ffd5; --accent-border:#315746; --accent-button:#176b50; }
+body.palette-ocean { --accent:#61c9f2; --accent-strong:#b2eaff; --accent-border:#28566d; --accent-button:#17658a; }
+body.palette-violet { --accent:#b69aff; --accent-strong:#dfd0ff; --accent-border:#554477; --accent-button:#6544a0; }
+body.palette-rose { --accent:#ff8fae; --accent-strong:#ffd0dd; --accent-border:#744052; --accent-button:#a74364; }
+body.palette-amber { --accent:#f0c36a; --accent-strong:#ffe6ad; --accent-border:#705b32; --accent-button:#92651d; }
+body { --green:var(--accent); --green-bright:var(--accent-strong); }
+.title-group h1, .stat-value, .graph-title, .graph-legend .green, .sidebar-title { color:var(--accent); }
+.question .correct { color:var(--accent); }
+#answer:focus { border-color:var(--accent); }
+button { background:var(--accent-button); border-color:var(--accent-border); }
+button:hover { filter:brightness(1.15); }
+.graph-box { border-color:var(--accent-border); }
+.graph-badge { color:var(--accent); border-color:var(--accent-border); }
+
+.question .space-mark {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: .9em;
+    height: 1.15em;
+    margin: 0 .04em;
+    padding: 0 .08em;
+    color: var(--accent);
+    background: color-mix(in srgb, var(--accent) 13%, transparent);
+    border: 1px solid var(--accent-border);
+    border-radius: .18em;
+    font-family: ui-monospace, monospace;
+    font-size: .72em;
+    font-weight: 900;
+    line-height: 1;
+    vertical-align: .08em;
+}
+
+@media (max-width: 720px) {
+    body { padding: 6px 8px; }
+    .layout {
+        grid-template-columns: 1fr;
+        grid-template-rows: minmax(0, 1fr) auto;
+        gap: 6px;
+    }
+    .top-header { flex-wrap: wrap; gap: 4px; }
+    .subtitle { display: none; }
+    .skip-hint { padding: 5px 8px; font-size: 10px; }
+    .sidebar {
+        flex-direction: row;
+        align-items: flex-end;
+        padding: 7px 9px;
+        gap: 8px;
+    }
+    .sidebar-section {
+        flex: 1 1 auto;
+        flex-direction: row;
+        gap: 8px;
+    }
+    .sidebar-title { display: none; }
+    .setting { flex: 1 1 0; }
+    .setting label { font-size: 10px; margin-bottom: 2px; }
+    .sidebar-footer { flex: 0 0 auto; }
+    #resetButton { padding: 5px 10px; font-size: 11px; }
+}
+</style>
+</head>
+<body>
+<div class="layout">
+    <div class="main-area">
+        <header class="top-header">
+            <div class="title-group">
+                <h1>Wikipedia 無限タイピング</h1>
+                <div class="subtitle">bun.textファイルからランダムに出題されるタイピングゲーム</div>
+            </div>
+            <div class="appearance-controls">
+                <label class="palette-control" for="paletteSelect">カラー
+                    <select id="paletteSelect">
+                        <option value="emerald">エメラルド</option>
+                        <option value="ocean">オーシャン</option>
+                        <option value="violet">バイオレット</option>
+                        <option value="rose">ローズ</option>
+                        <option value="amber">アンバー</option>
+                    </select>
+                </label>
+                <button id="themeToggle" type="button" aria-pressed="false">☀ ライトモード</button>
+            </div>
+        </header>
+
+        <div class="skip-hint"><strong>⏭ スキップ方法</strong> 入力文のどこかに <b>スキップ</b> と入力すると、その問題を記録せずに飛ばせます。</div>
+
+        <div class="stats">
+            <div class="stat">
+                <div class="stat-label">合計入力文字数（スキップ除外）</div>
+                <div class="stat-value" id="totalChars">0</div>
+            </div>
+            <div class="stat">
+                <div class="stat-label">最高平均入力速度</div>
+                <div class="stat-value"><span id="maxSpeed">0.0</span><span class="stat-unit"> 文字/秒</span></div>
+            </div>
+        </div>
+
+        <div class="question-box">
+            <div class="question-label" id="questionLabel">問題を読み込んでいます...</div>
+            <div class="question" id="question">準備中...</div>
+        </div>
+
+        <section class="graph-box" aria-label="タイピング速度グラフ">
+            <div class="graph-header">
+                <div>
+                    <div class="graph-title">TYPING PERFORMANCE</div>
+                    <div class="graph-description">入力時に更新・過去60秒の平均秒速</div>
+                </div>
+                <div class="graph-badge">GROWTH RECORD</div>
+            </div>
+            <div class="canvas-wrap">
+                <canvas id="speedGraph"></canvas>
+            </div>
+            <div class="graph-legend"><span class="green">━ 入力速度</span><span class="gold">┄ 最高速度</span></div>
+        </section>
+
+        <div class="typing-area">
+            <textarea id="answer"
+                placeholder="ここに日本語を入力してください。「スキップ」を含めると次の問題へ移動します。"
+                autocomplete="off" autocorrect="off" spellcheck="false"
+                disabled></textarea>
+        </div>
+
+        <div class="bottom-bar">
+            <div class="message" id="message">bun.textから問題を読み込み中...</div>
+            <!-- kure.textの内容を表示する目立たないクレジット表記エリア -->
+            <div class="credit-footer" id="creditFooter"></div>
+        </div>
+    </div>
+
+    <aside class="sidebar" aria-label="表示設定と操作">
+        <div class="sidebar-section">
+            <div class="sidebar-title">表示設定</div>
+            <div class="setting">
+                <label for="questionFontSize">出題文の文字サイズ <span id="questionSizeVal">32px</span></label>
+                <input id="questionFontSize" type="range" min="14" max="56" step="1" value="32">
+            </div>
+            <div class="setting">
+                <label for="answerFontSize">入力欄の文字サイズ <span id="answerSizeVal">32px</span></label>
+                <input id="answerFontSize" type="range" min="14" max="56" step="1" value="32">
+            </div>
+        </div>
+        <div class="sidebar-footer">
+            <button id="resetButton" type="button">記録リセット</button>
+        </div>
+    </aside>
+</div>
+
+<script>
+"use strict";
+
+let questions = [];
+let shuffledQuestions = [];
+let target = "";
+let totalChars = 0;
+let maxSpeed = 0;
+let solved = false;
+let loading = true;
+let composing = false;
+let previousValue = "";
+let inputEvents = [];
+let speedHistory = [];
+
+const answer = document.getElementById("answer");
+const question = document.getElementById("question");
+const message = document.getElementById("message");
+const creditFooter = document.getElementById("creditFooter");
+const canvas = document.getElementById("speedGraph");
+const ctx = canvas.getContext("2d");
+const skipWord = "スキップ";
+const paletteSelect = document.getElementById("paletteSelect");
+const themeToggle = document.getElementById("themeToggle");
+
+paletteSelect.addEventListener("change", () => {
+    document.body.classList.remove("palette-ocean", "palette-violet", "palette-rose", "palette-amber");
+    if (paletteSelect.value !== "emerald") document.body.classList.add("palette-" + paletteSelect.value);
+    drawGraph();
+});
+themeToggle.addEventListener("click", () => {
+    const light = document.body.classList.toggle("light-mode");
+    themeToggle.textContent = light ? "☾ ダークモード" : "☀ ライトモード";
+    themeToggle.setAttribute("aria-pressed", String(light));
+    drawGraph();
+});
+
+document.getElementById("resetButton").addEventListener("click", resetGame);
+
+function normalizeText(value) {
+    return String(value)
+        .replace(/ /g, " ")
+        .replace(/!/g, "！")
+        .replace(/\?/g, "？")
+        .replace(/\(/g, "（")
+        .replace(/\)/g, "）");
+}
+
+function initSlider(sliderId, cssVariable, valSpanId) {
+    const slider = document.getElementById(sliderId);
+    const valSpan = document.getElementById(valSpanId);
+    const update = () => {
+        const size = slider.value;
+        valSpan.textContent = size + "px";
+        document.documentElement.style.setProperty(cssVariable, size + "px");
+    };
+    slider.addEventListener("input", update);
+    update();
+}
+
+initSlider("questionFontSize", "--question-size", "questionSizeVal");
+initSlider("answerFontSize", "--answer-size", "answerSizeVal");
+
+function shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+}
+
+// bun.text と kure.text を同じフォルダから非同期で読み込む
+async function loadFiles() {
+    try {
+        const kureRes = await fetch("kure.text");
+        if (kureRes.ok) {
+            const kureText = await kureRes.text();
+            creditFooter.textContent = kureText.trim();
+        } else {
+            creditFooter.textContent = "出典：フリー百科事典『ウィキペディア（Wikipedia）』";
+        }
+    } catch (e) {
+        creditFooter.textContent = "出典：フリー百科事典『ウィキペディア（Wikipedia）』";
+    }
+
+    try {
+        const bunRes = await fetch("bun.text");
+        if (!bunRes.ok) throw new Error("bun.textの読み込みに失敗しました");
+        const bunText = await bunRes.text();
+        
+        questions = bunText.split(/\r?\n/)
+            .map(line => line.trim())
+            .filter(line => line.length > 0);
+
+        if (questions.length === 0) {
+            throw new Error("bun.textに有効な文章がありません");
+        }
+
+        shuffledQuestions = shuffleArray([...questions]);
+        loading = false;
+        nextQuestion();
+    } catch (e) {
+        console.error(e);
+        // フォールバック（ファイルが直読みできない環境用のデフォルトデータ）
+        questions = [
+            "きさらぎ駅は、2004年に日本のインターネット匿名掲示板に投稿された都市伝説である。",
+            "ネッシーは、イギリス・スコットランドのネス湖に棲むと伝えられている未確認生物である。",
+            "ツチノコは、日本に生息するといわれている、胴が太く短いヘビに似た未確認動物である。"
+        ];
+        shuffledQuestions = shuffleArray([...questions]);
+        loading = false;
+        nextQuestion();
+        message.textContent = "bun.textの取得に失敗したため、内蔵データを使用しています。";
+    }
+}
+
+function nextQuestion() {
+    if (loading) return;
+    loading = true;
+    solved = false;
+    answer.value = "";
+    previousValue = "";
+    answer.disabled = true;
+
+    if (shuffledQuestions.length === 0) {
+        shuffledQuestions = shuffleArray([...questions]);
+    }
+
+    target = normalizeText(shuffledQuestions.pop());
+
+    updateQuestion();
+    document.getElementById("questionLabel").textContent = "次の文章を入力してください";
+    message.textContent = "タイピング開始！「スキップ」と入れると記録せず飛ばせます。";
+    
+    answer.disabled = false;
+    answer.focus();
+    loading = false;
+}
+
+function countInsertedCharacters(oldText, newText) {
+    const oldChars = Array.from(oldText);
+    const newChars = Array.from(newText);
+    let prefix = 0;
+    while (prefix < oldChars.length && prefix < newChars.length &&
+           oldChars[prefix] === newChars[prefix]) prefix++;
+    let suffix = 0;
+    while (suffix < oldChars.length - prefix && suffix < newChars.length - prefix &&
+           oldChars[oldChars.length - 1 - suffix] === newChars[newChars.length - 1 - suffix]) suffix++;
+    return Math.max(0, newChars.length - prefix - suffix);
+}
+
+function processInput() {
+    if (loading || solved || composing) return;
+
+    const currentValue = answer.value;
+
+    if (currentValue.includes(skipWord)) {
+        answer.value = "";
+        previousValue = "";
+        message.textContent = "「スキップ」を検出しました。この問題は記録せずにスキップします...";
+        nextQuestion();
+        return;
+    }
+
+    const added = countInsertedCharacters(previousValue, currentValue);
+    if (added > 0) {
+        totalChars += added;
+        recordTyping(added);
+    }
+
+    previousValue = currentValue;
+    updateQuestion();
+    updateStats();
+
+    if (currentValue === target && target.length > 0) {
+        solved = true;
+        answer.disabled = true;
+        message.textContent = "正解！ 次の問題へ...";
+        setTimeout(nextQuestion, 150);
+    }
+}
+
+answer.addEventListener("compositionstart", () => { composing = true; });
+answer.addEventListener("compositionend", () => {
+    composing = false;
+    setTimeout(processInput, 0);
+});
+answer.addEventListener("input", event => {
+    if (composing || event.isComposing) return;
+    processInput();
+});
+
+function updateQuestion() {
+    const typed = Array.from(answer.value);
+    const chars = Array.from(target);
+    let html = "";
+    
+    for (let i = 0; i < chars.length; i++) {
+        let className = "";
+        if (i < typed.length) {
+            className = (typed[i] === chars[i]) ? "correct" : "wrong";
+        } else if (i === typed.length) {
+            className = "current";
+        }
+        
+        if (chars[i] === " ") {
+            html += '<span class="' + className + ' space-mark" title="全角スペース">␣</span>';
+        } else {
+            html += '<span class="' + className + '">' + escapeHTML(chars[i]) + "</span>";
+        }
+    }
+    question.innerHTML = html;
+}
+
+function escapeHTML(str) {
+    return String(str).replace(/[&<>"']/g, char => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+    })[char]);
+}
+
+function getRecentSpeed(now) {
+    inputEvents = inputEvents.filter(time => now - time <= 60000);
+    const charsPerMinute = inputEvents.length;
+    return charsPerMinute / 60;
+}
+
+function recordTyping(added) {
+    const now = performance.now();
+    for (let i = 0; i < added; i++) inputEvents.push(now);
+    const speed = getRecentSpeed(now);
+    if (speed > maxSpeed) maxSpeed = speed;
+    speedHistory.push({ time: now, speed });
+    speedHistory = speedHistory.filter(item => now - item.time <= 60000);
+    updateStats();
+    drawGraph();
+}
+
+function updateStats() {
+    document.getElementById("totalChars").textContent = totalChars.toLocaleString("ja-JP");
+    document.getElementById("maxSpeed").textContent = maxSpeed.toFixed(1);
+}
+
+function drawGraph() {
+    const rect = canvas.getBoundingClientRect();
+    const dpr = Math.max(1, window.devicePixelRatio || 1);
+    const width = rect.width;
+    const height = rect.height;
+    if (!width || !height) return;
+    canvas.width = Math.round(width * dpr);
+    canvas.height = Math.round(height * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, width, height);
+
+    const left = 44, right = width - 12, top = 8, bottom = height - 20;
+    const graphWidth = right - left, graphHeight = bottom - top;
+    const highest = Math.max(1, Math.ceil(maxSpeed * 2) / 2);
+
+    ctx.strokeStyle = getComputedStyle(document.body).getPropertyValue("--line").trim() || "#263b35";
+    ctx.lineWidth = 1;
+    ctx.fillStyle = "#82948d";
+    ctx.font = "10px sans-serif";
+    ctx.textAlign = "right";
+    for (let i = 0; i <= 4; i++) {
+        const y = top + graphHeight * i / 4;
+        ctx.beginPath(); ctx.moveTo(left, y); ctx.lineTo(right, y); ctx.stroke();
+        ctx.fillText((highest * (4 - i) / 4).toFixed(1), left - 6, y + 3);
+    }
+
+    if (maxSpeed > 0) {
+        const recordY = bottom - (maxSpeed / highest) * graphHeight;
+        ctx.beginPath(); ctx.setLineDash([5, 5]);
+        ctx.moveTo(left, recordY); ctx.lineTo(right, recordY);
+        ctx.strokeStyle = "#e8c96e"; ctx.lineWidth = 1.5; ctx.stroke(); ctx.setLineDash([]);
+    }
+
+    ctx.fillStyle = "#82948d"; ctx.textAlign = "center";
+    ["60秒前", "45秒前", "30秒前", "15秒前", "入力時点"].forEach((label, i) => {
+        ctx.fillText(label, left + graphWidth * i / 4, height - 4);
+    });
+
+    if (!speedHistory.length) {
+        ctx.fillStyle = "#71847b"; ctx.textAlign = "center";
+        ctx.fillText("文字を入力すると速度の記録が始まります", width / 2, height / 2);
+        return;
+    }
+
+    const now = performance.now();
+    const points = speedHistory.map(item => ({
+        x: right - ((now - item.time) / 60000) * graphWidth,
+        y: bottom - (item.speed / highest) * graphHeight
+    })).filter(point => point.x >= left && point.x <= right);
+    if (!points.length) return;
+
+    if (points.length > 1) {
+        ctx.beginPath(); ctx.moveTo(points[0].x, bottom);
+        points.forEach(point => ctx.lineTo(point.x, point.y));
+        ctx.lineTo(points[points.length - 1].x, bottom); ctx.closePath();
+        const gradient = ctx.createLinearGradient(0, top, 0, bottom);
+        gradient.addColorStop(0, "rgba(65,230,155,.32)");
+        gradient.addColorStop(1, "rgba(65,230,155,.015)");
+        ctx.fillStyle = gradient; ctx.fill();
+    }
+
+    ctx.beginPath();
+    points.forEach((point, index) => index === 0 ? ctx.moveTo(point.x, point.y) : ctx.lineTo(point.x, point.y));
+    ctx.strokeStyle = getComputedStyle(document.body).getPropertyValue("--accent").trim() || "#65e6ae"; ctx.lineWidth = 2.8;
+    ctx.lineJoin = "round"; ctx.lineCap = "round";
+    ctx.shadowColor = getComputedStyle(document.body).getPropertyValue("--accent").trim() || "#65e6ae"; ctx.shadowBlur = 7; ctx.stroke(); ctx.shadowBlur = 0;
+    const last = points[points.length - 1];
+    ctx.beginPath(); ctx.arc(last.x, last.y, 4, 0, Math.PI * 2);
+    ctx.fillStyle = getComputedStyle(document.body).getPropertyValue("--accent-strong").trim() || "#d7ffea"; ctx.fill();
+}
+
+function resetGame() {
+    totalChars = 0;
+    maxSpeed = 0;
+    inputEvents = [];
+    speedHistory = [];
+    updateStats();
+    drawGraph();
+    message.textContent = "記録をリセットしました！";
+}
+
+window.addEventListener("resize", drawGraph);
+updateStats();
+drawGraph();
+loadFiles();
+</script>
+</body>
+</html>
