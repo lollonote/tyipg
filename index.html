@@ -264,17 +264,41 @@ body {
     text-overflow: ellipsis;
 }
 
-/* 画面内のわかるけどあまり目立たない場所に配置したクレジット表記（kure.textの内容） */
+/* kure.text のクレジットを、固定サイズのスクロールボックス内に収納 */
 .credit-footer {
-    font-size: 11px;
-    color: var(--muted);
-    opacity: 0.7;
-    letter-spacing: 0.3px;
+    flex: 0 0 220px;
+    width: 220px;
+    max-width: 38%;
+    height: 54px;
+    max-height: 54px;
+    min-width: 0;
     margin: 0;
-    text-align: right;
+    padding: 6px 9px;
+    overflow-x: hidden;
+    overflow-y: auto;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    text-align: left;
+    font-size: 10px;
+    line-height: 1.45;
+    color: var(--muted);
+    opacity: 0.78;
+    letter-spacing: 0.2px;
+    background: rgba(17, 26, 34, 0.72);
+    border: 1px solid var(--line);
+    border-radius: 7px;
+    scrollbar-width: thin;
+    scrollbar-color: var(--accent-border) transparent;
 }
 .credit-footer:hover {
     opacity: 1;
+}
+.credit-footer::-webkit-scrollbar {
+    width: 6px;
+}
+.credit-footer::-webkit-scrollbar-thumb {
+    background: var(--accent-border);
+    border-radius: 6px;
 }
 
 .sidebar {
@@ -418,6 +442,16 @@ button:hover { filter:brightness(1.15); }
     .setting { flex: 1 1 0; }
     .setting label { font-size: 10px; margin-bottom: 2px; }
     .sidebar-footer { flex: 0 0 auto; }
+    .bottom-bar { align-items: center; }
+    .credit-footer {
+        flex-basis: 40%;
+        width: 40%;
+        max-width: 40%;
+        height: 46px;
+        max-height: 46px;
+        padding: 5px 7px;
+        font-size: 9px;
+    }
     #resetButton { padding: 5px 10px; font-size: 11px; }
 }
 </style>
@@ -485,7 +519,7 @@ button:hover { filter:brightness(1.15); }
 
         <div class="bottom-bar">
             <div class="message" id="message">bun.textから問題を読み込み中...</div>
-            <!-- kure.textの内容を表示する目立たないクレジット表記エリア -->
+            <!-- kure.textの内容を表示するスクロール可能なクレジットボックス -->
             <div class="credit-footer" id="creditFooter"></div>
         </div>
     </div>
