@@ -693,7 +693,7 @@ function countInsertedCharacters(oldText, newText) {
     return Math.max(0, newChars.length - prefix - suffix);
 }
 
-function processInput() {
+function processInput(compositionStartTime = null) {
     if (loading || solved || composing) return;
 
     const currentValue = answer.value;
@@ -709,7 +709,7 @@ function processInput() {
     const added = countInsertedCharacters(previousValue, currentValue);
     if (added > 0) {
         totalChars += added;
-        recordTyping(added);
+        recordTyping(added, compositionStartTime);
     }
 
     previousValue = currentValue;
@@ -724,10 +724,15 @@ function processInput() {
     }
 }
 
-answer.addEventListener("compositionstart", () => { composing = true; });
+let compositionStartedAt = 0;
+answer.addEventListener("compositionstart", () => {
+    composing = true;
+    compositionStartedAt = performance.now();
+});
 answer.addEventListener("compositionend", () => {
+    const startedAt = compositionStartedAt;
     composing = false;
-    setTimeout(processInput, 0);
+    setTimeout(() => processInput(startedAt), 0);
 });
 answer.addEventListener("input", event => {
     if (composing || event.isComposing) return;
@@ -763,14 +768,28 @@ function escapeHTML(str) {
 }
 
 function getRecentSpeed(now) {
+    // 過去60秒以内の入力だけを対象にする。
     inputEvents = inputEvents.filter(time => now - time <= 60000);
-    const charsPerMinute = inputEvents.length;
-    return charsPerMinute / 60;
+    if (inputEvents.length === 0) return 0;
+
+    // 計測開始から60秒未満なら、実際に経過した時間で割る。
+    // 60秒を超えたら直近60秒間の平均に切り替える。
+    const elapsedMs = Math.min(60000, Math.max(1000, now - inputEvents[0]));
+    return inputEvents.length / (elapsedMs / 1000);
 }
 
-function recordTyping(added) {
+function recordTyping(added, compositionStartTime = null) {
     const now = performance.now();
-    for (let i = 0; i < added; i++) inputEvents.push(now);
+
+    // 日本語IMEは変換確定時に複数文字がまとめて届くため、
+    // 変換開始から確定までの時間に文字を分散して記録する。
+    const start = Number.isFinite(compositionStartTime)
+        ? Math.min(compositionStartTime, now)
+        : now;
+    const duration = now - start;
+    for (let i = 0; i < added; i++) {
+        inputEvents.push(start + duration * ((i + 1) / added));
+    }
     const speed = getRecentSpeed(now);
     if (speed > maxSpeed) maxSpeed = speed;
     speedHistory.push({ time: now, speed });
