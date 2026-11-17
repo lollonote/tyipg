@@ -676,7 +676,7 @@ const sidebarToggleBtn = document.getElementById("sidebarToggleBtn");
 
 sidebarToggleBtn.addEventListener("click", () => {
     const isHidden = mainLayout.classList.toggle("sidebar-hidden");
-    sidebarToggleBtn.textContent = isHidden ? "▶ 設定" : "◀ 閉じる";
+    sidebarToggleBtn.textContent = isHidden ? "設定" : "◀ 閉じる";
     requestAnimationFrame(updateQuestionScroll);
     setTimeout(updateQuestionScroll, 320);
 });
