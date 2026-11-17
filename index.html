@@ -3,51 +3,58 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Wikipedia 無限タイピング</title>
+<title>Typedia</title>
 <style>
 :root {
-    color-scheme: dark;
-    --bg: #080d12;
-    --panel: #111a22;
-    --line: #294139;
-    --text: #e8f2ee;
-    --muted: #82948d;
-    --green: #65e6ae;
-    --green-bright: #a8ffd5;
-    --gold: #e8c96e;
-    --question-size: 32px;
+    color-scheme: light;
+    --bg: #f8fafc;
+    --panel: #ffffff;
+    --line: #e2e8f0;
+    --text: #0f172a;
+    --muted: #64748b;
+    --primary: #9b1c31;
+    --primary-light: #fef2f2;
+    --question-size: 40px;
     --answer-size: 32px;
 }
+
 * { box-sizing: border-box; }
 html, body { height: 100%; }
+
 body {
     margin: 0;
-    padding: clamp(6px, 1.2vh, 12px) 14px;
+    padding: clamp(12px, 1.8vh, 20px) 24px;
     height: 100vh;
     height: 100dvh;
     overflow: hidden;
     background: var(--bg);
     color: var(--text);
-    font-family: "Yu Gothic", "Meiryo", sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     text-align: center;
     position: relative;
+    transition: background 0.3s ease, color 0.3s ease;
 }
 
 .layout {
-    width: min(1160px, 100%);
+    width: min(1200px, 100%);
     height: 100%;
     margin: 0 auto;
     display: grid;
-    grid-template-columns: minmax(0, 1fr) 230px;
-    gap: 12px;
+    grid-template-columns: minmax(0, 1fr) 260px;
+    gap: 16px;
     min-height: 0;
+    transition: grid-template-columns 0.3s ease;
+}
+
+.layout.sidebar-hidden {
+    grid-template-columns: minmax(0, 1fr) 50px;
 }
 
 .main-area {
     height: 100%;
     display: flex;
     flex-direction: column;
-    gap: clamp(5px, 0.9vh, 10px);
+    gap: clamp(10px, 1.4vh, 16px);
     min-height: 0;
 }
 
@@ -56,26 +63,29 @@ body {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 10px;
+    gap: 12px;
     text-align: left;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--line);
 }
-.title-group h1 {
-    margin: 0;
-    color: var(--green);
-    font-size: clamp(20px, 3vw, 27px);
-    line-height: 1.15;
+
+.logo-container {
+    display: flex;
+    align-items: center;
 }
-.subtitle {
-    margin: 2px 0 0;
-    color: var(--muted);
-    font-size: 12px;
+.logo-container img {
+    height: clamp(40px, 5.5vw, 56px);
+    width: auto;
+    display: block;
+    object-fit: contain;
 }
+
 .appearance-controls {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
     justify-content: flex-end;
-    gap: 8px;
+    gap: 10px;
 }
 .palette-control {
     display: flex;
@@ -83,145 +93,167 @@ body {
     gap: 6px;
     color: var(--muted);
     font-size: 12px;
+    font-weight: 500;
 }
 .palette-control select {
-    padding: 6px 8px;
+    padding: 6px 10px;
     color: var(--text);
-    background: #0b141a;
-    border: 1px solid #34515a;
-    border-radius: 7px;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 6px;
     font: inherit;
+    font-size: 12px;
+    cursor: pointer;
+    outline: none;
+    transition: border-color 0.2s;
+}
+.palette-control select:focus {
+    border-color: var(--primary);
 }
 #themeToggle {
     margin: 0;
-    padding: 6px 11px;
+    padding: 6px 12px;
     font-size: 12px;
+    border-radius: 6px;
 }
-
-.skip-hint {
-    flex: 0 0 auto;
-    padding: 7px 12px;
-    color: var(--text);
-    background: color-mix(in srgb, var(--accent) 11%, var(--panel));
-    border: 1px solid var(--accent-border);
-    border-radius: 9px;
-    text-align: left;
-    font-size: 12px;
-    line-height: 1.4;
-}
-.skip-hint strong, .skip-hint b { color: var(--accent); }
 
 .stats {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 10px;
+    gap: 12px;
     margin: 0;
     flex: 0 0 auto;
 }
 .stat {
-    padding: 6px 10px;
+    padding: 10px 14px;
     background: var(--panel);
     border: 1px solid var(--line);
-    border-radius: 10px;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+    text-align: left;
 }
-.stat-label { color: var(--muted); font-size: 11px; }
+.stat-label { color: var(--muted); font-size: 11px; font-weight: 500; }
 .stat-value {
-    margin-top: 1px;
-    color: var(--green);
-    font-size: clamp(19px, 2.8vh, 24px);
+    margin-top: 2px;
+    color: var(--primary);
+    font-size: clamp(20px, 2.8vh, 24px);
     font-weight: 700;
     font-variant-numeric: tabular-nums;
+    letter-spacing: -0.02em;
 }
 .stat-unit { color: var(--muted); font-size: 11px; font-weight: 400; }
 
 .question-box {
     display: flex;
     flex: 1 1 0;
-    min-height: 64px;
+    min-height: 80px;
     flex-direction: column;
     justify-content: center;
     margin: 0;
-    padding: clamp(8px, 1.4vh, 16px) 16px;
-    overflow: hidden;
+    padding: clamp(12px, 1.8vh, 20px) 20px;
     background: var(--panel);
-    border: 1px solid #293e49;
-    border-radius: 13px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+    text-align: left;
+    position: relative;
+    overflow: hidden;
 }
 .question-label {
     flex: 0 0 auto;
-    margin-bottom: 4px;
-    color: #8ba9b5;
+    margin-bottom: 6px;
+    color: var(--muted);
     font-size: 12px;
+    font-weight: 500;
 }
-.question {
-    font-size: var(--question-size);
-    line-height: 1.35;
-    white-space: normal;
-    overflow-wrap: anywhere;
-    word-break: break-all;
-}
-.correct { color: var(--green); }
-.wrong { color: #ff7b8a; text-decoration: underline wavy #ff7b8a; }
-.current { border-bottom: 3px solid var(--green); }
 
-.graph-box {
+.question-viewport {
+    width: 100%;
+    overflow: hidden;
+    position: relative;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+}
+
+.question {
+    display: inline-block;
+    font-size: var(--question-size);
+    line-height: 1.45;
+    white-space: nowrap;
+    font-weight: 500;
+    position: relative;
+    left: 0;
+    transform: translateX(0);
+    transition: transform 0.1s ease-out;
+    will-change: transform;
+}
+
+.correct { color: var(--primary); }
+.wrong { color: #ef4444; text-decoration: underline wavy #ef4444; }
+.current { border-bottom: 2px solid var(--primary); }
+
+.rank-box {
     display: flex;
     flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
     flex: 1 1 0;
-    min-height: 95px;
+    min-height: 96px;
     margin: 0;
-    padding: 7px 11px 5px;
-    text-align: left;
-    background: rgba(12, 20, 24, .97);
-    border: 1px solid #315746;
-    border-radius: 12px;
-    box-shadow: 0 8px 26px rgba(0,0,0,.30);
+    padding: 12px 18px;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+    position: relative;
     overflow: hidden;
 }
-.graph-header {
-    flex: 0 0 auto;
+.rank-box::before {
+    content: "";
+    position: absolute;
+    left: 0; top: 0; bottom: 0; width: 4px;
+    background: var(--primary);
+    transition: background 0.3s;
+}
+.rank-header-row {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 10px;
-    margin-bottom: 4px;
-}
-.graph-title { color: var(--green-bright); font-size: 12px; font-weight: 700; letter-spacing: 1.2px; }
-.graph-description { margin-top: 2px; color: var(--muted); font-size: 10px; }
-.graph-badge {
-    flex: 0 0 auto;
-    padding: 3px 8px;
-    color: var(--green);
-    border: 1px solid #32694e;
-    border-radius: 20px;
-    font-size: 9px;
-    letter-spacing: 1px;
-}
-.canvas-wrap {
-    flex: 1 1 0;
-    min-height: 0;
     width: 100%;
-    position: relative;
+    margin-bottom: 2px;
 }
-#speedGraph {
-    display: block;
-    width: 100%;
-    height: 100%;
+.rank-title {
+    color: var(--muted);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
 }
-.graph-legend {
-    flex: 0 0 auto;
+.rank-badge-tag {
+    background: var(--primary-light);
+    color: var(--primary);
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 4px;
+}
+.rank-display {
+    font-size: clamp(21px, 3vh, 28px);
+    font-weight: 800;
+    color: var(--primary);
+    letter-spacing: -0.02em;
+}
+.rank-sub {
     margin-top: 2px;
     color: var(--muted);
-    text-align: right;
-    font-size: 10px;
+    font-size: 12px;
+    font-weight: 500;
 }
-.graph-legend .green { color: var(--green); }
-.graph-legend .gold { margin-left: 10px; color: var(--gold); }
 
 .typing-area {
     margin: 0;
     flex: 0.85 1 0;
-    min-height: 54px;
+    min-height: 58px;
     display: flex;
 }
 #answer {
@@ -229,21 +261,23 @@ body {
     width: 100%;
     height: 100%;
     min-height: 0;
-    padding: 8px 12px;
-    color: #effff7;
-    background: #121e26;
-    border: 2px solid #34515a;
-    border-radius: 10px;
+    padding: 12px 16px;
+    color: var(--text);
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 8px;
     outline: none;
     font-family: inherit;
     font-size: var(--answer-size);
-    line-height: 1.3;
+    line-height: 1.4;
     white-space: pre-wrap;
     overflow-wrap: anywhere;
     word-break: break-all;
     resize: none;
+    box-shadow: inset 0 1px 2px rgba(0,0,0,0.02);
+    transition: border-color 0.2s, box-shadow 0.2s;
 }
-#answer:focus { border-color: var(--green); box-shadow: 0 0 0 3px rgba(101,230,174,.09); }
+#answer:focus { border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-light); }
 #answer:disabled { opacity: .55; }
 
 .bottom-bar {
@@ -251,81 +285,148 @@ body {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 10px;
-    min-height: 18px;
+    gap: 12px;
+    min-height: 22px;
 }
 .message {
     margin: 0;
-    color: var(--green);
+    color: var(--primary);
     font-size: 12px;
+    font-weight: 500;
     text-align: left;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
 }
 
-/* kure.text のクレジットを、固定サイズのスクロールボックス内に収納 */
 .credit-footer {
-    flex: 0 0 220px;
-    width: 220px;
+    flex: 0 0 240px;
+    width: 240px;
     max-width: 38%;
-    height: 54px;
-    max-height: 54px;
+    height: 48px;
+    max-height: 48px;
     min-width: 0;
     margin: 0;
-    padding: 6px 9px;
+    padding: 6px 10px;
     overflow-x: hidden;
     overflow-y: auto;
     white-space: pre-wrap;
     overflow-wrap: anywhere;
     text-align: left;
     font-size: 10px;
-    line-height: 1.45;
+    line-height: 1.4;
     color: var(--muted);
-    opacity: 0.78;
-    letter-spacing: 0.2px;
-    background: rgba(17, 26, 34, 0.72);
+    opacity: 0.85;
+    background: var(--panel);
     border: 1px solid var(--line);
-    border-radius: 7px;
-    scrollbar-width: thin;
-    scrollbar-color: var(--accent-border) transparent;
-}
-.credit-footer:hover {
-    opacity: 1;
-}
-.credit-footer::-webkit-scrollbar {
-    width: 6px;
-}
-.credit-footer::-webkit-scrollbar-thumb {
-    background: var(--accent-border);
     border-radius: 6px;
+    scrollbar-width: thin;
 }
+.credit-footer:hover { opacity: 1; }
 
 .sidebar {
     height: 100%;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    gap: 12px;
-    padding: 14px 12px;
+    gap: 14px;
+    padding: 16px 14px;
     background: var(--panel);
     border: 1px solid var(--line);
-    border-radius: 13px;
+    border-radius: 10px;
     text-align: left;
     min-height: 0;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+    position: relative;
+    overflow: hidden;
+    transition: padding 0.3s ease;
 }
-.sidebar-section {
+
+.layout.sidebar-hidden .sidebar > *:not(.sidebar-toggle-bar) {
+    display: none;
+}
+.layout.sidebar-hidden .sidebar {
+    padding: 12px 6px;
+    align-items: center;
+}
+
+.sidebar-toggle-bar {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    width: 100%;
+}
+#sidebarToggleBtn {
+    background: transparent;
+    border: 1px solid var(--line);
+    color: var(--muted);
+    padding: 5px 10px;
+    font-size: 11px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 500;
+    white-space: nowrap;
+}
+#sidebarToggleBtn:hover {
+    background: var(--primary-light);
+    color: var(--primary);
+    border-color: var(--primary);
+}
+
+.best-record-box {
+    padding: 10px 12px;
+    background: var(--primary-light);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+}
+.best-record-title {
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--muted);
+    letter-spacing: 0.05em;
+    margin-bottom: 2px;
+}
+.best-record-value {
+    font-size: 15px;
+    font-weight: 800;
+    color: var(--primary);
+}
+.best-record-sub {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 1px;
+}
+
+.skip-hint-sidebar {
+    padding: 10px 12px;
+    color: var(--text);
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-left: 3px solid var(--primary);
+    border-radius: 6px;
+    font-size: 11px;
+    line-height: 1.45;
+}
+.skip-hint-sidebar b { color: var(--primary); }
+
+.sidebar-top-group {
     display: flex;
     flex-direction: column;
     gap: 12px;
 }
+
+.sidebar-section {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
 .sidebar-title {
     padding-bottom: 6px;
     border-bottom: 1px solid var(--line);
-    color: var(--accent);
-    font-size: 13px;
+    color: var(--primary);
+    font-size: 12px;
     font-weight: 700;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.05em;
 }
 .setting label {
     display: flex;
@@ -334,6 +435,7 @@ body {
     margin-bottom: 4px;
     color: var(--muted);
     font-size: 12px;
+    font-weight: 500;
 }
 .setting label span {
     color: var(--text);
@@ -342,7 +444,7 @@ body {
 }
 .setting input[type="range"] {
     width: 100%;
-    accent-color: var(--accent);
+    accent-color: var(--primary);
     cursor: pointer;
 }
 .sidebar-footer {
@@ -353,50 +455,34 @@ body {
 button {
     margin: 0;
     padding: 9px 14px;
-    color: #f2fff8;
-    background: #176b50;
-    border: 1px solid #318568;
-    border-radius: 8px;
+    color: #ffffff;
+    background: var(--primary);
+    border: 1px solid var(--primary);
+    border-radius: 6px;
     font: inherit;
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 600;
     cursor: pointer;
+    transition: opacity 0.2s, background 0.2s;
 }
-button:hover { background: #218b67; }
-#resetButton {
-    width: 100%;
+button:hover { opacity: 0.9; }
+#resetButton { width: 100%; }
+
+body.dark-mode {
+    color-scheme: dark;
+    --bg: #090d16;
+    --panel: #111827;
+    --line: #1f2937;
+    --text: #f9fafb;
+    --muted: #9ca3af;
+    --primary: #f43f5e;
+    --primary-light: #2d1217;
 }
 
-body.light-mode {
-    color-scheme: light;
-    --bg:#f1f5f7; --panel:#ffffff; --line:#cbd8df; --text:#1b2932; --muted:#647783;
-    background:var(--bg); color:var(--text);
-}
-body.light-mode .question-box, body.light-mode .stat, body.light-mode .sidebar {
-    background:var(--panel); border-color:var(--line);
-}
-body.light-mode .graph-box {
-    background:#fff; border-color:var(--line); box-shadow:0 8px 24px rgba(35,58,70,.10);
-}
-body.light-mode #answer, body.light-mode .palette-control select {
-    color:var(--text); background:#f7fafb; border-color:#bdcbd2;
-}
-body.light-mode .question-label { color:#536d7b; }
-body.light-mode .graph-description, body.light-mode .graph-legend { color:var(--muted); }
-
-:root { --accent:#65e6ae; --accent-strong:#a8ffd5; --accent-border:#315746; --accent-button:#176b50; }
-body.palette-ocean { --accent:#61c9f2; --accent-strong:#b2eaff; --accent-border:#28566d; --accent-button:#17658a; }
-body.palette-violet { --accent:#b69aff; --accent-strong:#dfd0ff; --accent-border:#554477; --accent-button:#6544a0; }
-body.palette-rose { --accent:#ff8fae; --accent-strong:#ffd0dd; --accent-border:#744052; --accent-button:#a74364; }
-body.palette-amber { --accent:#f0c36a; --accent-strong:#ffe6ad; --accent-border:#705b32; --accent-button:#92651d; }
-body { --green:var(--accent); --green-bright:var(--accent-strong); }
-.title-group h1, .stat-value, .graph-title, .graph-legend .green, .sidebar-title { color:var(--accent); }
-.question .correct { color:var(--accent); }
-#answer:focus { border-color:var(--accent); }
-button { background:var(--accent-button); border-color:var(--accent-border); }
-button:hover { filter:brightness(1.15); }
-.graph-box { border-color:var(--accent-border); }
-.graph-badge { color:var(--accent); border-color:var(--accent-border); }
+body.palette-ocean { --primary: #0284c7; --primary-light: #f0f9ff; }
+body.palette-violet { --primary: #7c3aed; --primary-light: #f5f3ff; }
+body.palette-rose { --primary: #e11d48; --primary-light: #fff1f2; }
+body.palette-amber { --primary: #d97706; --primary-light: #fffbeb; }
 
 .question .space-mark {
     display: inline-flex;
@@ -406,13 +492,13 @@ button:hover { filter:brightness(1.15); }
     height: 1.15em;
     margin: 0 .04em;
     padding: 0 .08em;
-    color: var(--accent);
-    background: color-mix(in srgb, var(--accent) 13%, transparent);
-    border: 1px solid var(--accent-border);
-    border-radius: .18em;
+    color: var(--primary);
+    background: var(--primary-light);
+    border: 1px solid var(--line);
+    border-radius: 4px;
     font-family: ui-monospace, monospace;
     font-size: .72em;
-    font-weight: 900;
+    font-weight: 700;
     line-height: 1;
     vertical-align: .08em;
 }
@@ -424,15 +510,20 @@ button:hover { filter:brightness(1.15); }
         grid-template-rows: minmax(0, 1fr) auto;
         gap: 6px;
     }
+    .layout.sidebar-hidden {
+        grid-template-columns: 1fr;
+        grid-template-rows: minmax(0, 1fr) 40px;
+    }
     .top-header { flex-wrap: wrap; gap: 4px; }
-    .subtitle { display: none; }
-    .skip-hint { padding: 5px 8px; font-size: 10px; }
     .sidebar {
         flex-direction: row;
         align-items: flex-end;
-        padding: 7px 9px;
+        padding: 8px 10px;
         gap: 8px;
     }
+    .sidebar-top-group { flex-direction: row; flex: 1 1 auto; }
+    .skip-hint-sidebar { display: none; }
+    .best-record-box { display: none; }
     .sidebar-section {
         flex: 1 1 auto;
         flex-direction: row;
@@ -447,38 +538,35 @@ button:hover { filter:brightness(1.15); }
         flex-basis: 40%;
         width: 40%;
         max-width: 40%;
-        height: 46px;
-        max-height: 46px;
-        padding: 5px 7px;
-        font-size: 9px;
+        height: 42px;
+        max-height: 42px;
+        padding: 4px 6px;
+        font-size: 8px;
     }
     #resetButton { padding: 5px 10px; font-size: 11px; }
 }
 </style>
 </head>
 <body>
-<div class="layout">
+<div class="layout" id="mainLayout">
     <div class="main-area">
         <header class="top-header">
-            <div class="title-group">
-                <h1>Wikipedia 無限タイピング</h1>
-                <div class="subtitle">bun.textファイルからランダムに出題されるタイピングゲーム</div>
+            <div class="logo-container">
+                <img id="logoImg" src="logo.png" alt="Typedia">
             </div>
             <div class="appearance-controls">
                 <label class="palette-control" for="paletteSelect">カラー
                     <select id="paletteSelect">
-                        <option value="emerald">エメラルド</option>
+                        <option value="emerald">バーガンディ</option>
                         <option value="ocean">オーシャン</option>
                         <option value="violet">バイオレット</option>
                         <option value="rose">ローズ</option>
                         <option value="amber">アンバー</option>
                     </select>
                 </label>
-                <button id="themeToggle" type="button" aria-pressed="false">☀ ライトモード</button>
+                <button id="themeToggle" type="button" aria-pressed="false">☾ ダークモード</button>
             </div>
         </header>
-
-        <div class="skip-hint"><strong>⏭ スキップ方法</strong> 入力文のどこかに <b>スキップ</b> と入力すると、その問題を記録せずに飛ばせます。</div>
 
         <div class="stats">
             <div class="stat">
@@ -493,21 +581,18 @@ button:hover { filter:brightness(1.15); }
 
         <div class="question-box">
             <div class="question-label" id="questionLabel">問題を読み込んでいます...</div>
-            <div class="question" id="question">準備中...</div>
+            <div class="question-viewport" id="questionViewport">
+                <div class="question" id="question">準備中...</div>
+            </div>
         </div>
 
-        <section class="graph-box" aria-label="タイピング速度グラフ">
-            <div class="graph-header">
-                <div>
-                    <div class="graph-title">TYPING PERFORMANCE</div>
-                    <div class="graph-description">入力時に更新・過去60秒の平均秒速</div>
-                </div>
-                <div class="graph-badge">GROWTH RECORD</div>
+        <section class="rank-box" id="rankBox" aria-label="現在のランク">
+            <div class="rank-header-row">
+                <div class="rank-title">BEST RANK</div>
+                <div class="rank-badge-tag">最高記録</div>
             </div>
-            <div class="canvas-wrap">
-                <canvas id="speedGraph"></canvas>
-            </div>
-            <div class="graph-legend"><span class="green">━ 入力速度</span><span class="gold">┄ 最高速度</span></div>
+            <div class="rank-display" id="rankName">ブロンズ級</div>
+            <div class="rank-sub" id="rankSub">最高平均入力速度: 0.0 文字/秒</div>
         </section>
 
         <div class="typing-area">
@@ -518,22 +603,36 @@ button:hover { filter:brightness(1.15); }
         </div>
 
         <div class="bottom-bar">
-            <div class="message" id="message">bun.textから問題を読み込み中...</div>
-            <!-- kure.textの内容を表示するスクロール可能なクレジットボックス -->
+            <div class="message" id="message"></div>
             <div class="credit-footer" id="creditFooter"></div>
         </div>
     </div>
 
-    <aside class="sidebar" aria-label="表示設定と操作">
-        <div class="sidebar-section">
-            <div class="sidebar-title">表示設定</div>
-            <div class="setting">
-                <label for="questionFontSize">出題文の文字サイズ <span id="questionSizeVal">32px</span></label>
-                <input id="questionFontSize" type="range" min="14" max="56" step="1" value="32">
+    <aside class="sidebar" id="sidebar" aria-label="表示設定と操作">
+        <div class="sidebar-toggle-bar">
+            <button id="sidebarToggleBtn" type="button">◀ 閉じる</button>
+        </div>
+        <div class="sidebar-top-group">
+            <div class="best-record-box">
+                <div class="best-record-title">ALL-TIME BEST RECORD</div>
+                <div class="best-record-value" id="savedBestRank">ブロンズ級</div>
+                <div class="best-record-sub" id="savedBestSub">最高: 0.0 文字/秒</div>
             </div>
-            <div class="setting">
-                <label for="answerFontSize">入力欄の文字サイズ <span id="answerSizeVal">32px</span></label>
-                <input id="answerFontSize" type="range" min="14" max="56" step="1" value="32">
+
+            <div class="skip-hint-sidebar">
+                <strong>スキップ方法</strong><br>
+                入力文のどこかに <b>スキップ</b> と入力すると、その問題を記録せずに飛ばせます。
+            </div>
+            <div class="sidebar-section">
+                <div class="sidebar-title">表示設定</div>
+                <div class="setting">
+                    <label for="questionFontSize">出題文の文字サイズ <span id="questionSizeVal">40px</span></label>
+                    <input id="questionFontSize" type="range" min="14" max="64" step="1" value="40">
+                </div>
+                <div class="setting">
+                    <label for="answerFontSize">入力欄の文字サイズ <span id="answerSizeVal">32px</span></label>
+                    <input id="answerFontSize" type="range" min="14" max="56" step="1" value="32">
+                </div>
             </div>
         </div>
         <div class="sidebar-footer">
@@ -549,37 +648,140 @@ let questions = [];
 let shuffledQuestions = [];
 let target = "";
 let totalChars = 0;
-let maxSpeed = 0;
+let currentSpeed = 0;
+let savedMaxSpeed = 0;
 let solved = false;
 let loading = true;
 let composing = false;
 let previousValue = "";
 let inputEvents = [];
-let speedHistory = [];
 
 const answer = document.getElementById("answer");
 const question = document.getElementById("question");
+const questionViewport = document.getElementById("questionViewport");
 const message = document.getElementById("message");
 const creditFooter = document.getElementById("creditFooter");
-const canvas = document.getElementById("speedGraph");
-const ctx = canvas.getContext("2d");
+const rankNameEl = document.getElementById("rankName");
+const rankSubEl = document.getElementById("rankSub");
+const savedBestRankEl = document.getElementById("savedBestRank");
+const savedBestSubEl = document.getElementById("savedBestSub");
+const logoImg = document.getElementById("logoImg");
 const skipWord = "スキップ";
 const paletteSelect = document.getElementById("paletteSelect");
 const themeToggle = document.getElementById("themeToggle");
+const questionFontSizeInput = document.getElementById("questionFontSize");
+const answerFontSizeInput = document.getElementById("answerFontSize");
+const mainLayout = document.getElementById("mainLayout");
+const sidebarToggleBtn = document.getElementById("sidebarToggleBtn");
+
+sidebarToggleBtn.addEventListener("click", () => {
+    const isHidden = mainLayout.classList.toggle("sidebar-hidden");
+    sidebarToggleBtn.textContent = isHidden ? "▶ 設定" : "◀ 閉じる";
+    requestAnimationFrame(updateQuestionScroll);
+    setTimeout(updateQuestionScroll, 320);
+});
+
+function setCookie(name, value, days = 365) {
+    const d = new Date();
+    d.setTime(d.getTime() + (days * 24 * 60 * 60 * 1000));
+    document.cookie = `${name}=${encodeURIComponent(value)};expires=${d.toUTCString()};path=/`;
+}
+function getCookie(name) {
+    const nameEQ = name + "=";
+    const ca = document.cookie.split(';');
+    for(let i = 0; i < ca.length; i++) {
+        let c = ca[i];
+        while (c.charAt(0) === ' ') c = c.substring(1, c.length);
+        if (c.indexOf(nameEQ) === 0) {
+            try {
+                return decodeURIComponent(c.substring(nameEQ.length, c.length));
+            } catch(e) {
+                return c.substring(nameEQ.length, c.length);
+            }
+        }
+    }
+    return null;
+}
+
+function loadPreferences() {
+    const savedTotalChars = getCookie("totalChars");
+    if (savedTotalChars !== null) {
+        totalChars = parseInt(savedTotalChars, 10) || 0;
+    }
+
+    const cookieMaxSpeed = getCookie("maxSpeed");
+    if (cookieMaxSpeed !== null) {
+        savedMaxSpeed = parseFloat(cookieMaxSpeed) || 0;
+    }
+
+    const savedDarkMode = getCookie("darkMode");
+    const isDark = savedDarkMode === "true";
+    if (isDark) {
+        document.body.classList.add("dark-mode");
+        document.body.classList.remove("light-mode");
+        themeToggle.textContent = "☀ ライトモード";
+        themeToggle.setAttribute("aria-pressed", "true");
+        logoImg.src = "logo2.png";
+    } else {
+        document.body.classList.add("light-mode");
+        document.body.classList.remove("dark-mode");
+        themeToggle.textContent = "☾ ダークモード";
+        themeToggle.setAttribute("aria-pressed", "false");
+        logoImg.src = "logo.png";
+    }
+
+    const savedPalette = getCookie("palette");
+    if (savedPalette) {
+        paletteSelect.value = savedPalette;
+        document.body.classList.remove("palette-ocean", "palette-violet", "palette-rose", "palette-amber");
+        if (savedPalette !== "emerald") {
+            document.body.classList.add("palette-" + savedPalette);
+        }
+    }
+
+    const savedQSize = getCookie("questionFontSize");
+    if (savedQSize) {
+        questionFontSizeInput.value = savedQSize;
+    } else {
+        questionFontSizeInput.value = "40";
+    }
+
+    const savedASize = getCookie("answerFontSize");
+    if (savedASize) {
+        answerFontSizeInput.value = savedASize;
+    }
+}
+
+function savePreferences() {
+    setCookie("totalChars", totalChars);
+    setCookie("maxSpeed", savedMaxSpeed);
+    setCookie("darkMode", document.body.classList.contains("dark-mode"));
+    setCookie("palette", paletteSelect.value);
+    setCookie("questionFontSize", questionFontSizeInput.value);
+    setCookie("answerFontSize", answerFontSizeInput.value);
+}
+
+loadPreferences();
 
 paletteSelect.addEventListener("change", () => {
     document.body.classList.remove("palette-ocean", "palette-violet", "palette-rose", "palette-amber");
     if (paletteSelect.value !== "emerald") document.body.classList.add("palette-" + paletteSelect.value);
-    drawGraph();
-});
-themeToggle.addEventListener("click", () => {
-    const light = document.body.classList.toggle("light-mode");
-    themeToggle.textContent = light ? "☾ ダークモード" : "☀ ライトモード";
-    themeToggle.setAttribute("aria-pressed", String(light));
-    drawGraph();
+    savePreferences();
 });
 
-document.getElementById("resetButton").addEventListener("click", resetGame);
+themeToggle.addEventListener("click", () => {
+    const dark = document.body.classList.toggle("dark-mode");
+    document.body.classList.toggle("light-mode", !dark);
+    themeToggle.textContent = dark ? "☀ ライトモード" : "☾ ダークモード";
+    themeToggle.setAttribute("aria-pressed", String(dark));
+    logoImg.src = dark ? "logo2.png" : "logo.png";
+    savePreferences();
+});
+
+document.getElementById("resetButton").addEventListener("click", () => {
+    resetGame();
+    savePreferences();
+});
 
 function normalizeText(value) {
     return String(value)
@@ -597,6 +799,8 @@ function initSlider(sliderId, cssVariable, valSpanId) {
         const size = slider.value;
         valSpan.textContent = size + "px";
         document.documentElement.style.setProperty(cssVariable, size + "px");
+        savePreferences();
+        requestAnimationFrame(updateQuestionScroll);
     };
     slider.addEventListener("input", update);
     update();
@@ -613,7 +817,6 @@ function shuffleArray(array) {
     return array;
 }
 
-// bun.text と kure.text を同じフォルダから非同期で読み込む
 async function loadFiles() {
     try {
         const kureRes = await fetch("kure.text");
@@ -645,7 +848,6 @@ async function loadFiles() {
         nextQuestion();
     } catch (e) {
         console.error(e);
-        // フォールバック（ファイルが直読みできない環境用のデフォルトデータ）
         questions = [
             "きさらぎ駅は、2004年に日本のインターネット匿名掲示板に投稿された都市伝説である。",
             "ネッシーは、イギリス・スコットランドのネス湖に棲むと伝えられている未確認生物である。",
@@ -654,7 +856,6 @@ async function loadFiles() {
         shuffledQuestions = shuffleArray([...questions]);
         loading = false;
         nextQuestion();
-        message.textContent = "bun.textの取得に失敗したため、内蔵データを使用しています。";
     }
 }
 
@@ -674,7 +875,7 @@ function nextQuestion() {
 
     updateQuestion();
     document.getElementById("questionLabel").textContent = "次の文章を入力してください";
-    message.textContent = "タイピング開始！「スキップ」と入れると記録せず飛ばせます。";
+    message.textContent = "";
     
     answer.disabled = false;
     answer.focus();
@@ -692,8 +893,7 @@ function countInsertedCharacters(oldText, newText) {
            oldChars[oldChars.length - 1 - suffix] === newChars[newChars.length - 1 - suffix]) suffix++;
     return Math.max(0, newChars.length - prefix - suffix);
 }
-
-function processInput(compositionStartTime = null) {
+function processInput(options = {}) {
     if (loading || solved || composing) return;
 
     const currentValue = answer.value;
@@ -701,15 +901,18 @@ function processInput(compositionStartTime = null) {
     if (currentValue.includes(skipWord)) {
         answer.value = "";
         previousValue = "";
-        message.textContent = "「スキップ」を検出しました。この問題は記録せずにスキップします...";
+        message.textContent = "「スキップ」しました";
         nextQuestion();
         return;
     }
 
+    // 正誤に関係なく、新しく入力された文字を測定する
     const added = countInsertedCharacters(previousValue, currentValue);
+
     if (added > 0) {
         totalChars += added;
-        recordTyping(added, compositionStartTime);
+        savePreferences();
+        recordTyping(added, options.compositionStartTime);
     }
 
     previousValue = currentValue;
@@ -719,7 +922,7 @@ function processInput(compositionStartTime = null) {
     if (currentValue === target && target.length > 0) {
         solved = true;
         answer.disabled = true;
-        message.textContent = "正解！ 次の問題へ...";
+        message.textContent = "正解！";
         setTimeout(nextQuestion, 150);
     }
 }
@@ -732,11 +935,14 @@ answer.addEventListener("compositionstart", () => {
 answer.addEventListener("compositionend", () => {
     const startedAt = compositionStartedAt;
     composing = false;
-    setTimeout(() => processInput(startedAt), 0);
+    setTimeout(() => processInput({
+        compositionStartTime: startedAt,
+        inputType: "insertCompositionText"
+    }), 0);
 });
 answer.addEventListener("input", event => {
     if (composing || event.isComposing) return;
-    processInput();
+    processInput({ inputType: event.inputType || "" });
 });
 
 function updateQuestion() {
@@ -749,7 +955,7 @@ function updateQuestion() {
         if (i < typed.length) {
             className = (typed[i] === chars[i]) ? "correct" : "wrong";
         } else if (i === typed.length) {
-            className = "current";
+            className = "current target-cursor";
         }
         
         if (chars[i] === " ") {
@@ -759,6 +965,20 @@ function updateQuestion() {
         }
     }
     question.innerHTML = html;
+    requestAnimationFrame(updateQuestionScroll);
+}
+
+function updateQuestionScroll() {
+    const viewportWidth = questionViewport.clientWidth;
+    if (!viewportWidth) return;
+
+    const cursorEl = question.querySelector(".target-cursor");
+    const targetPoint = cursorEl
+        ? cursorEl.offsetLeft + cursorEl.offsetWidth / 2
+        : question.offsetWidth;
+
+    const centerOffset = viewportWidth / 2 - targetPoint;
+    question.style.transform = `translateX(${centerOffset}px)`;
 }
 
 function escapeHTML(str) {
@@ -767,126 +987,83 @@ function escapeHTML(str) {
     })[char]);
 }
 
+// 直近60秒の入力履歴から速度を測定する
 function getRecentSpeed(now) {
-    // 過去60秒以内の入力だけを対象にする。
     inputEvents = inputEvents.filter(time => now - time <= 60000);
+
     if (inputEvents.length === 0) return 0;
 
-    // 計測開始から60秒未満なら、実際に経過した時間で割る。
-    // 60秒を超えたら直近60秒間の平均に切り替える。
-    const elapsedMs = Math.min(60000, Math.max(1000, now - inputEvents[0]));
+    const elapsedMs = Math.min(
+        60000,
+        Math.max(1000, now - inputEvents[0])
+    );
+
     return inputEvents.length / (elapsedMs / 1000);
 }
 
 function recordTyping(added, compositionStartTime = null) {
     const now = performance.now();
-
-    // 日本語IMEは変換確定時に複数文字がまとめて届くため、
-    // 変換開始から確定までの時間に文字を分散して記録する。
     const start = Number.isFinite(compositionStartTime)
         ? Math.min(compositionStartTime, now)
         : now;
-    const duration = now - start;
+
+    const duration = Math.max(0, now - start);
+
+    // 入力された文字を入力時刻に分散して記録
     for (let i = 0; i < added; i++) {
-        inputEvents.push(start + duration * ((i + 1) / added));
+        inputEvents.push(
+            start + duration * ((i + 1) / added)
+        );
     }
-    const speed = getRecentSpeed(now);
-    if (speed > maxSpeed) maxSpeed = speed;
-    speedHistory.push({ time: now, speed });
-    speedHistory = speedHistory.filter(item => now - item.time <= 60000);
+
+    currentSpeed = getRecentSpeed(now);
+
+    if (currentSpeed > savedMaxSpeed) {
+        savedMaxSpeed = currentSpeed;
+        savePreferences();
+    }
+
     updateStats();
-    drawGraph();
+    updateRanks();
+}
+
+function getRankDetails(speed) {
+    if (speed >= 10.0) return { name: "アルティメット級", desc: `最高速度: ${speed.toFixed(1)} 文字/秒 (10.0 以上)` };
+    if (speed >= 5.0)  return { name: "マスター級", desc: `最高速度: ${speed.toFixed(1)} 文字/秒 (5.0 〜 9.9)` };
+    if (speed >= 3.0)  return { name: "プラチナ級", desc: `最高速度: ${speed.toFixed(1)} 文字/秒 (3.0 〜 4.9)` };
+    if (speed >= 2.0)  return { name: "ゴールド級", desc: `最高速度: ${speed.toFixed(1)} 文字/秒 (2.0 〜 2.9)` };
+    if (speed >= 1.0)  return { name: "シルバー級", desc: `最高速度: ${speed.toFixed(1)} 文字/秒 (1.0 〜 1.9)` };
+    return { name: "ブロンズ級", desc: `最高速度: ${speed.toFixed(1)} 文字/秒 (1.0 未満)` };
+}
+
+function updateRanks() {
+    // ランクは常に最高記録（v1の「最高平均入力速度」）を基準にする
+    const bestInfo = getRankDetails(savedMaxSpeed);
+    rankNameEl.textContent = bestInfo.name;
+    rankSubEl.textContent = `最高平均入力速度: ${savedMaxSpeed.toFixed(1)} 文字/秒`;
+    savedBestRankEl.textContent = bestInfo.name;
+    savedBestSubEl.textContent = bestInfo.desc;
 }
 
 function updateStats() {
     document.getElementById("totalChars").textContent = totalChars.toLocaleString("ja-JP");
-    document.getElementById("maxSpeed").textContent = maxSpeed.toFixed(1);
-}
-
-function drawGraph() {
-    const rect = canvas.getBoundingClientRect();
-    const dpr = Math.max(1, window.devicePixelRatio || 1);
-    const width = rect.width;
-    const height = rect.height;
-    if (!width || !height) return;
-    canvas.width = Math.round(width * dpr);
-    canvas.height = Math.round(height * dpr);
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    ctx.clearRect(0, 0, width, height);
-
-    const left = 44, right = width - 12, top = 8, bottom = height - 20;
-    const graphWidth = right - left, graphHeight = bottom - top;
-    const highest = Math.max(1, Math.ceil(maxSpeed * 2) / 2);
-
-    ctx.strokeStyle = getComputedStyle(document.body).getPropertyValue("--line").trim() || "#263b35";
-    ctx.lineWidth = 1;
-    ctx.fillStyle = "#82948d";
-    ctx.font = "10px sans-serif";
-    ctx.textAlign = "right";
-    for (let i = 0; i <= 4; i++) {
-        const y = top + graphHeight * i / 4;
-        ctx.beginPath(); ctx.moveTo(left, y); ctx.lineTo(right, y); ctx.stroke();
-        ctx.fillText((highest * (4 - i) / 4).toFixed(1), left - 6, y + 3);
-    }
-
-    if (maxSpeed > 0) {
-        const recordY = bottom - (maxSpeed / highest) * graphHeight;
-        ctx.beginPath(); ctx.setLineDash([5, 5]);
-        ctx.moveTo(left, recordY); ctx.lineTo(right, recordY);
-        ctx.strokeStyle = "#e8c96e"; ctx.lineWidth = 1.5; ctx.stroke(); ctx.setLineDash([]);
-    }
-
-    ctx.fillStyle = "#82948d"; ctx.textAlign = "center";
-    ["60秒前", "45秒前", "30秒前", "15秒前", "入力時点"].forEach((label, i) => {
-        ctx.fillText(label, left + graphWidth * i / 4, height - 4);
-    });
-
-    if (!speedHistory.length) {
-        ctx.fillStyle = "#71847b"; ctx.textAlign = "center";
-        ctx.fillText("文字を入力すると速度の記録が始まります", width / 2, height / 2);
-        return;
-    }
-
-    const now = performance.now();
-    const points = speedHistory.map(item => ({
-        x: right - ((now - item.time) / 60000) * graphWidth,
-        y: bottom - (item.speed / highest) * graphHeight
-    })).filter(point => point.x >= left && point.x <= right);
-    if (!points.length) return;
-
-    if (points.length > 1) {
-        ctx.beginPath(); ctx.moveTo(points[0].x, bottom);
-        points.forEach(point => ctx.lineTo(point.x, point.y));
-        ctx.lineTo(points[points.length - 1].x, bottom); ctx.closePath();
-        const gradient = ctx.createLinearGradient(0, top, 0, bottom);
-        gradient.addColorStop(0, "rgba(65,230,155,.32)");
-        gradient.addColorStop(1, "rgba(65,230,155,.015)");
-        ctx.fillStyle = gradient; ctx.fill();
-    }
-
-    ctx.beginPath();
-    points.forEach((point, index) => index === 0 ? ctx.moveTo(point.x, point.y) : ctx.lineTo(point.x, point.y));
-    ctx.strokeStyle = getComputedStyle(document.body).getPropertyValue("--accent").trim() || "#65e6ae"; ctx.lineWidth = 2.8;
-    ctx.lineJoin = "round"; ctx.lineCap = "round";
-    ctx.shadowColor = getComputedStyle(document.body).getPropertyValue("--accent").trim() || "#65e6ae"; ctx.shadowBlur = 7; ctx.stroke(); ctx.shadowBlur = 0;
-    const last = points[points.length - 1];
-    ctx.beginPath(); ctx.arc(last.x, last.y, 4, 0, Math.PI * 2);
-    ctx.fillStyle = getComputedStyle(document.body).getPropertyValue("--accent-strong").trim() || "#d7ffea"; ctx.fill();
+    document.getElementById("maxSpeed").textContent = savedMaxSpeed.toFixed(1);
 }
 
 function resetGame() {
     totalChars = 0;
-    maxSpeed = 0;
+    savedMaxSpeed = 0;
     inputEvents = [];
-    speedHistory = [];
+    currentSpeed = 0;
     updateStats();
-    drawGraph();
-    message.textContent = "記録をリセットしました！";
+    updateRanks();
+    message.textContent = "記録をリセットしました";
 }
 
-window.addEventListener("resize", drawGraph);
+window.addEventListener("resize", updateQuestionScroll);
+
 updateStats();
-drawGraph();
+updateRanks();
 loadFiles();
 </script>
 </body>
