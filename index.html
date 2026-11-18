@@ -481,8 +481,41 @@ body.dark-mode {
 
 body.palette-ocean { --primary: #0284c7; --primary-light: #f0f9ff; }
 body.palette-violet { --primary: #7c3aed; --primary-light: #f5f3ff; }
-body.palette-rose { --primary: #e11d48; --primary-light: #fff1f2; }
+body.palette-rose { --primary: #e8668f; --primary-light: #fff0f5; }
 body.palette-amber { --primary: #d97706; --primary-light: #fffbeb; }
+
+body.dark-mode.palette-ocean  { --primary: #38bdf8; --primary-light: #0c2433; }
+body.dark-mode.palette-violet { --primary: #a78bfa; --primary-light: #211a3a; }
+body.dark-mode.palette-rose   { --primary: #f48fb1; --primary-light: #33181f; }
+body.dark-mode.palette-amber  { --primary: #fbbf24; --primary-light: #2f2410; }
+
+#replayButton { width: 100%; background: transparent; color: var(--primary); }
+#replayButton:disabled { opacity: .45; cursor: not-allowed; }
+.replay-overlay {
+    position: fixed; inset: 0; z-index: 100;
+    display: none; align-items: center; justify-content: center;
+    padding: 16px; background: rgba(15, 23, 42, 0.55);
+}
+.replay-overlay.open { display: flex; }
+.replay-panel {
+    width: min(880px, 100%); max-height: 100%; overflow: auto;
+    padding: 20px 22px; text-align: left;
+    background: var(--panel); color: var(--text);
+    border: 1px solid var(--line); border-radius: 12px;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.25);
+}
+.replay-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin-bottom: 10px; }
+.replay-title { color: var(--primary); font-weight: 800; font-size: 16px; }
+.replay-meta { color: var(--muted); font-size: 12px; }
+.replay-question { font-size: 26px; line-height: 1.6; word-break: break-all; margin-bottom: 12px; }
+.replay-typed {
+    min-height: 64px; padding: 10px 14px; margin-bottom: 12px;
+    font-size: 26px; line-height: 1.5; white-space: pre-wrap; word-break: break-all;
+    background: var(--panel); border: 1px solid var(--line); border-radius: 8px;
+}
+.replay-actions { display: flex; gap: 8px; justify-content: flex-end; align-items: center; }
+.replay-status { margin-right: auto; color: var(--muted); font-size: 12px; }
+.replay-actions button.secondary { background: transparent; color: var(--primary); }
 
 .question .space-mark {
     display: inline-flex;
@@ -574,8 +607,8 @@ body.palette-amber { --primary: #d97706; --primary-light: #fffbeb; }
                 <div class="stat-value" id="totalChars">0</div>
             </div>
             <div class="stat">
-                <div class="stat-label">最高平均入力速度</div>
-                <div class="stat-value"><span id="maxSpeed">0.0</span><span class="stat-unit"> 文字/秒</span></div>
+                <div class="stat-label">最高平均打鍵速度</div>
+                <div class="stat-value"><span id="maxSpeed">0.0</span><span class="stat-unit"> 打/秒</span></div>
             </div>
         </div>
 
@@ -592,7 +625,7 @@ body.palette-amber { --primary: #d97706; --primary-light: #fffbeb; }
                 <div class="rank-badge-tag">最高記録</div>
             </div>
             <div class="rank-display" id="rankName">ブロンズ級</div>
-            <div class="rank-sub" id="rankSub">最高平均入力速度: 0.0 文字/秒</div>
+            <div class="rank-sub" id="rankSub">最高平均打鍵速度: 0.0 打/秒</div>
         </section>
 
         <div class="typing-area">
@@ -610,13 +643,13 @@ body.palette-amber { --primary: #d97706; --primary-light: #fffbeb; }
 
     <aside class="sidebar" id="sidebar" aria-label="表示設定と操作">
         <div class="sidebar-toggle-bar">
-            <button id="sidebarToggleBtn" type="button">閉じる ▶</button>
+            <button id="sidebarToggleBtn" type="button">◀ 閉じる</button>
         </div>
         <div class="sidebar-top-group">
             <div class="best-record-box">
                 <div class="best-record-title">ALL-TIME BEST RECORD</div>
                 <div class="best-record-value" id="savedBestRank">ブロンズ級</div>
-                <div class="best-record-sub" id="savedBestSub">最高: 0.0 文字/秒</div>
+                <div class="best-record-sub" id="savedBestSub">最高: 0.0 打/秒</div>
             </div>
 
             <div class="skip-hint-sidebar">
@@ -636,9 +669,26 @@ body.palette-amber { --primary: #d97706; --primary-light: #fffbeb; }
             </div>
         </div>
         <div class="sidebar-footer">
+            <button id="replayButton" type="button" disabled>ベスト記録をリプレイ</button>
             <button id="resetButton" type="button">記録リセット</button>
         </div>
     </aside>
+</div>
+
+<div class="replay-overlay" id="replayOverlay" role="dialog" aria-modal="true" aria-label="ベスト記録のリプレイ">
+    <div class="replay-panel">
+        <div class="replay-head">
+            <div class="replay-title">ベスト記録のリプレイ</div>
+            <div class="replay-meta" id="replayMeta"></div>
+        </div>
+        <div class="replay-question" id="replayQuestion"></div>
+        <div class="replay-typed" id="replayTyped"></div>
+        <div class="replay-actions">
+            <div class="replay-status" id="replayStatus"></div>
+            <button id="replayAgain" type="button">もう一度再生</button>
+            <button id="replayClose" type="button" class="secondary">閉じる</button>
+        </div>
+    </div>
 </div>
 
 <script>
@@ -655,6 +705,14 @@ let loading = true;
 let composing = false;
 let previousValue = "";
 let inputEvents = [];
+// 現在の問題で記録した内容（スキップ時に取り消すため）
+let questionKeyTimes = [];
+// ベスト記録リプレイ用：現在の問題の入力ログ
+const REPLAY_KEY = "typediaBestReplay";
+let replayLog = [];            // [{ at: performance.now(), v: 入力欄の内容 }]
+let recordSetThisQuestion = false;
+let questionChars = 0;
+let maxAtQuestionStart = 0;
 
 const answer = document.getElementById("answer");
 const question = document.getElementById("question");
@@ -676,7 +734,7 @@ const sidebarToggleBtn = document.getElementById("sidebarToggleBtn");
 
 sidebarToggleBtn.addEventListener("click", () => {
     const isHidden = mainLayout.classList.toggle("sidebar-hidden");
-    sidebarToggleBtn.textContent = isHidden ? "設定" : "◀ 閉じる";
+    sidebarToggleBtn.textContent = isHidden ? "▶ 設定" : "◀ 閉じる";
     requestAnimationFrame(updateQuestionScroll);
     setTimeout(updateQuestionScroll, 320);
 });
@@ -709,7 +767,7 @@ function loadPreferences() {
         totalChars = parseInt(savedTotalChars, 10) || 0;
     }
 
-    const cookieMaxSpeed = getCookie("maxSpeed");
+    const cookieMaxSpeed = getCookie("maxKeySpeed");
     if (cookieMaxSpeed !== null) {
         savedMaxSpeed = parseFloat(cookieMaxSpeed) || 0;
     }
@@ -754,7 +812,7 @@ function loadPreferences() {
 
 function savePreferences() {
     setCookie("totalChars", totalChars);
-    setCookie("maxSpeed", savedMaxSpeed);
+    setCookie("maxKeySpeed", savedMaxSpeed);
     setCookie("darkMode", document.body.classList.contains("dark-mode"));
     setCookie("palette", paletteSelect.value);
     setCookie("questionFontSize", questionFontSizeInput.value);
@@ -866,6 +924,11 @@ function nextQuestion() {
     answer.value = "";
     previousValue = "";
     answer.disabled = true;
+    questionKeyTimes = [];
+    questionChars = 0;
+    maxAtQuestionStart = savedMaxSpeed;
+    replayLog = [];
+    recordSetThisQuestion = false;
 
     if (shuffledQuestions.length === 0) {
         shuffledQuestions = shuffleArray([...questions]);
@@ -899,6 +962,15 @@ function processInput(options = {}) {
     const currentValue = answer.value;
 
     if (currentValue.includes(skipWord)) {
+        // この問題で記録した打鍵・文字数・最高記録の更新をすべて取り消す
+        const skipped = new Set(questionKeyTimes);
+        inputEvents = inputEvents.filter(t => !skipped.has(t));
+        totalChars = Math.max(0, totalChars - questionChars);
+        savedMaxSpeed = maxAtQuestionStart;
+        currentSpeed = getRecentSpeed(performance.now());
+        savePreferences();
+        updateStats();
+        updateRanks();
         answer.value = "";
         previousValue = "";
         message.textContent = "「スキップ」しました";
@@ -911,8 +983,8 @@ function processInput(options = {}) {
 
     if (added > 0) {
         totalChars += added;
+        questionChars += added;
         savePreferences();
-        recordTyping(added, options.compositionStartTime);
     }
 
     previousValue = currentValue;
@@ -923,6 +995,7 @@ function processInput(options = {}) {
         solved = true;
         answer.disabled = true;
         message.textContent = "正解！";
+        if (recordSetThisQuestion) saveBestReplay();
         setTimeout(nextQuestion, 150);
     }
 }
@@ -932,7 +1005,13 @@ answer.addEventListener("compositionstart", () => {
     composing = true;
     compositionStartedAt = performance.now();
 });
+function logSnapshot() {
+    if (loading || solved) return;
+    replayLog.push({ at: performance.now(), v: answer.value });
+}
+
 answer.addEventListener("compositionend", () => {
+    logSnapshot();
     const startedAt = compositionStartedAt;
     composing = false;
     setTimeout(() => processInput({
@@ -941,6 +1020,7 @@ answer.addEventListener("compositionend", () => {
     }), 0);
 });
 answer.addEventListener("input", event => {
+    logSnapshot();
     if (composing || event.isComposing) return;
     processInput({ inputType: event.inputType || "" });
 });
@@ -987,60 +1067,66 @@ function escapeHTML(str) {
     })[char]);
 }
 
-// 直近60秒の入力履歴から速度を測定する
+// 打鍵速度の測定（キー入力1回 = 1打）
+const WINDOW_MS = 10000;      // 直近10秒の窓で平均する
+const MIN_ELAPSED_MS = 3000;  // 開始直後の過大評価を防ぐ分母の下限
+
 function getRecentSpeed(now) {
-    inputEvents = inputEvents.filter(time => now - time <= 60000);
-
+    inputEvents = inputEvents.filter(time => now - time <= WINDOW_MS);
     if (inputEvents.length === 0) return 0;
-
-    const elapsedMs = Math.min(
-        60000,
-        Math.max(1000, now - inputEvents[0])
-    );
-
+    const elapsedMs = Math.min(WINDOW_MS, Math.max(MIN_ELAPSED_MS, now - inputEvents[0]));
     return inputEvents.length / (elapsedMs / 1000);
 }
 
-function recordTyping(added, compositionStartTime = null) {
-    const now = performance.now();
-    const start = Number.isFinite(compositionStartTime)
-        ? Math.min(compositionStartTime, now)
-        : now;
+const IGNORED_CODES = new Set([
+    "Backspace", "Delete", "Enter", "NumpadEnter", "Tab", "Escape",
+    "ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown",
+    "Home", "End", "PageUp", "PageDown", "Insert",
+    "ShiftLeft", "ShiftRight", "ControlLeft", "ControlRight",
+    "AltLeft", "AltRight", "MetaLeft", "MetaRight", "CapsLock",
+    "NonConvert", "Convert", "KanaMode", "Lang1", "Lang2", "Lang5", "Backquote"
+]);
 
-    const duration = Math.max(0, now - start);
-
-    // 入力された文字を入力時刻に分散して記録
-    for (let i = 0; i < added; i++) {
-        inputEvents.push(
-            start + duration * ((i + 1) / added)
-        );
-    }
-
-    currentSpeed = getRecentSpeed(now);
-
-    if (currentSpeed > savedMaxSpeed) {
-        savedMaxSpeed = currentSpeed;
-        savePreferences();
-    }
-
-    updateStats();
-    updateRanks();
+function isTypingKey(e) {
+    if (e.repeat || e.ctrlKey || e.metaKey || e.altKey) return false;
+    if (IGNORED_CODES.has(e.code)) return false;
+    if (/^F\d+$/.test(e.code)) return false;
+    // IME中のスペースは変換操作なので数えない
+    const imeActive = e.isComposing || e.key === "Process" || e.keyCode === 229;
+    if (imeActive && e.code === "Space") return false;
+    return true;
 }
 
+answer.addEventListener("keydown", e => {
+    if (loading || solved || answer.disabled) return;
+    if (!isTypingKey(e)) return;
+    const now = performance.now();
+    inputEvents.push(now);
+    questionKeyTimes.push(now);
+    currentSpeed = getRecentSpeed(now);
+    if (currentSpeed > savedMaxSpeed) {
+        savedMaxSpeed = currentSpeed;
+        recordSetThisQuestion = true;
+        savePreferences();
+    }
+    updateStats();
+    updateRanks();
+});
+
 function getRankDetails(speed) {
-    if (speed >= 10.0) return { name: "アルティメット級", desc: `最高速度: ${speed.toFixed(1)} 文字/秒 (10.0 以上)` };
-    if (speed >= 5.0)  return { name: "マスター級", desc: `最高速度: ${speed.toFixed(1)} 文字/秒 (5.0 〜 9.9)` };
-    if (speed >= 3.0)  return { name: "プラチナ級", desc: `最高速度: ${speed.toFixed(1)} 文字/秒 (3.0 〜 4.9)` };
-    if (speed >= 2.0)  return { name: "ゴールド級", desc: `最高速度: ${speed.toFixed(1)} 文字/秒 (2.0 〜 2.9)` };
-    if (speed >= 1.0)  return { name: "シルバー級", desc: `最高速度: ${speed.toFixed(1)} 文字/秒 (1.0 〜 1.9)` };
-    return { name: "ブロンズ級", desc: `最高速度: ${speed.toFixed(1)} 文字/秒 (1.0 未満)` };
+    if (speed >= 10.0) return { name: "アルティメット級", desc: `最高速度: ${speed.toFixed(1)} 打/秒 (10.0 以上)` };
+    if (speed >= 5.0)  return { name: "マスター級", desc: `最高速度: ${speed.toFixed(1)} 打/秒 (5.0 〜 9.9)` };
+    if (speed >= 3.0)  return { name: "プラチナ級", desc: `最高速度: ${speed.toFixed(1)} 打/秒 (3.0 〜 4.9)` };
+    if (speed >= 2.0)  return { name: "ゴールド級", desc: `最高速度: ${speed.toFixed(1)} 打/秒 (2.0 〜 2.9)` };
+    if (speed >= 1.0)  return { name: "シルバー級", desc: `最高速度: ${speed.toFixed(1)} 打/秒 (1.0 〜 1.9)` };
+    return { name: "ブロンズ級", desc: `最高速度: ${speed.toFixed(1)} 打/秒 (1.0 未満)` };
 }
 
 function updateRanks() {
-    // ランクは常に最高記録（v1の「最高平均入力速度」）を基準にする
+    // ランクは常に最高記録（v1の「最高平均打鍵速度」）を基準にする
     const bestInfo = getRankDetails(savedMaxSpeed);
     rankNameEl.textContent = bestInfo.name;
-    rankSubEl.textContent = `最高平均入力速度: ${savedMaxSpeed.toFixed(1)} 文字/秒`;
+    rankSubEl.textContent = `最高平均打鍵速度: ${savedMaxSpeed.toFixed(1)} 打/秒`;
     savedBestRankEl.textContent = bestInfo.name;
     savedBestSubEl.textContent = bestInfo.desc;
 }
@@ -1050,11 +1136,102 @@ function updateStats() {
     document.getElementById("maxSpeed").textContent = savedMaxSpeed.toFixed(1);
 }
 
+function saveBestReplay() {
+    if (!replayLog.length) return;
+    const base = replayLog[0].at;
+    const data = {
+        target,
+        speed: savedMaxSpeed,
+        date: new Date().toISOString(),
+        events: replayLog.map(e => [Math.round(e.at - base), e.v])
+    };
+    try { localStorage.setItem(REPLAY_KEY, JSON.stringify(data)); } catch (e) {}
+    updateReplayButton();
+}
+
+function loadBestReplay() {
+    try {
+        const raw = localStorage.getItem(REPLAY_KEY);
+        if (!raw) return null;
+        const data = JSON.parse(raw);
+        return data && data.target && Array.isArray(data.events) ? data : null;
+    } catch (e) { return null; }
+}
+
+const replayButton = document.getElementById("replayButton");
+const replayOverlay = document.getElementById("replayOverlay");
+const replayQuestionEl = document.getElementById("replayQuestion");
+const replayTypedEl = document.getElementById("replayTyped");
+const replayMetaEl = document.getElementById("replayMeta");
+const replayStatusEl = document.getElementById("replayStatus");
+let replayTimers = [];
+
+function updateReplayButton() {
+    const has = !!loadBestReplay();
+    replayButton.disabled = !has;
+    replayButton.title = has ? "" : "最高記録を更新した問題が保存されると使えます";
+}
+
+function renderReplayFrame(data, value) {
+    const typed = Array.from(value);
+    const chars = Array.from(data.target);
+    let html = "";
+    for (let i = 0; i < chars.length; i++) {
+        let cls = "";
+        if (i < typed.length) cls = typed[i] === chars[i] ? "correct" : "wrong";
+        else if (i === typed.length) cls = "current";
+        html += '<span class="' + cls + '">' + escapeHTML(chars[i]) + "</span>";
+    }
+    replayQuestionEl.innerHTML = html;
+    replayTypedEl.textContent = value;
+}
+
+function stopReplay() {
+    replayTimers.forEach(clearTimeout);
+    replayTimers = [];
+}
+
+function playReplay() {
+    const data = loadBestReplay();
+    if (!data) return;
+    stopReplay();
+    renderReplayFrame(data, "");
+    replayStatusEl.textContent = "再生中...";
+    data.events.forEach(([t, v]) => {
+        replayTimers.push(setTimeout(() => renderReplayFrame(data, v), t));
+    });
+    const end = data.events.length ? data.events[data.events.length - 1][0] : 0;
+    replayTimers.push(setTimeout(() => { replayStatusEl.textContent = "再生終了"; }, end + 50));
+}
+
+function openReplay() {
+    const data = loadBestReplay();
+    if (!data) return;
+    const d = new Date(data.date);
+    replayMetaEl.textContent = `${data.speed.toFixed(1)} 打/秒 ・ ${isNaN(d) ? "" : d.toLocaleString("ja-JP")}`;
+    replayOverlay.classList.add("open");
+    playReplay();
+}
+
+function closeReplay() {
+    stopReplay();
+    replayOverlay.classList.remove("open");
+    answer.focus();
+}
+
+replayButton.addEventListener("click", openReplay);
+document.getElementById("replayAgain").addEventListener("click", playReplay);
+document.getElementById("replayClose").addEventListener("click", closeReplay);
+replayOverlay.addEventListener("click", e => { if (e.target === replayOverlay) closeReplay(); });
+document.addEventListener("keydown", e => { if (e.key === "Escape" && replayOverlay.classList.contains("open")) closeReplay(); });
+
 function resetGame() {
     totalChars = 0;
     savedMaxSpeed = 0;
     inputEvents = [];
     currentSpeed = 0;
+    try { localStorage.removeItem(REPLAY_KEY); } catch (e) {}
+    updateReplayButton();
     updateStats();
     updateRanks();
     message.textContent = "記録をリセットしました";
@@ -1064,6 +1241,7 @@ window.addEventListener("resize", updateQuestionScroll);
 
 updateStats();
 updateRanks();
+updateReplayButton();
 loadFiles();
 </script>
 </body>
