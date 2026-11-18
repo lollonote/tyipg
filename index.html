@@ -3,7 +3,35 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Typedia</title>
+<title>Typedia（タイペディア）｜実用的なタイピングを永遠に</title>
+<meta name="description" content="Typedia（タイペディア）は、実用的なタイピングを永遠に練習できるサイト。Wikipediaの文章約600題を、漢字変換や文字の削除（打ち間違いの修正）も含めて入力し、打鍵速度の最高記録とランクを計測できます。">
+<meta name="keywords" content="Typedia,タイペディア,タイピング,タイピング練習,日本語,Wikipedia,長文,漢字変換,実用的,打鍵速度">
+<link rel="canonical" href="https://typedia8.vercel.app/">
+<link rel="icon" href="logo.png">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Typedia（タイペディア）">
+<meta property="og:title" content="Typedia（タイペディア）｜実用的なタイピングを永遠に">
+<meta property="og:description" content="Typedia（タイペディア）は、実用的なタイピングを永遠に練習できるサイト。Wikipediaの文章約600題を、漢字変換や文字の削除（打ち間違いの修正）も含めて入力し、打鍵速度の最高記録とランクを計測できます。">
+<meta property="og:url" content="https://typedia8.vercel.app/">
+<meta property="og:image" content="https://typedia8.vercel.app/logo.png">
+<meta property="og:locale" content="ja_JP">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Typedia（タイペディア）｜実用的なタイピングを永遠に">
+<meta name="twitter:description" content="Typedia（タイペディア）は、実用的なタイピングを永遠に練習できるサイト。Wikipediaの文章約600題を、漢字変換や文字の削除（打ち間違いの修正）も含めて入力し、打鍵速度の最高記録とランクを計測できます。">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "Typedia",
+  "alternateName": "タイペディア",
+  "url": "https://typedia8.vercel.app/",
+  "description": "Typedia（タイペディア）は、実用的なタイピングを永遠に練習できるサイト。Wikipediaの文章約600題を、漢字変換や文字の削除（打ち間違いの修正）も含めて入力し、打鍵速度の最高記録とランクを計測できます。",
+  "applicationCategory": "GameApplication",
+  "genre": "タイピング練習",
+  "operatingSystem": "Web ブラウザ",
+  "inLanguage": "ja"
+}
+</script>
 <style>
 :root {
     color-scheme: light;
@@ -19,14 +47,11 @@
 }
 
 * { box-sizing: border-box; }
-html, body { height: 100%; }
+html, body { min-height: 100%; }
 
 body {
     margin: 0;
-    padding: clamp(12px, 1.8vh, 20px) 24px;
-    height: 100vh;
-    height: 100dvh;
-    overflow: hidden;
+    overflow-x: hidden;
     background: var(--bg);
     color: var(--text);
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
@@ -34,6 +59,40 @@ body {
     position: relative;
     transition: background 0.3s ease, color 0.3s ease;
 }
+
+/* ゲーム画面は従来どおり1画面に収め、説明文はその下（スクロールした先）に置く */
+.app-screen {
+    height: 100vh;
+    height: 100dvh;
+    padding: clamp(12px, 1.8vh, 20px) 24px;
+    overflow: hidden;
+}
+
+/* 見出しは画面に出さず、検索エンジンと読み上げソフトにだけ伝える */
+.visually-hidden {
+    position: absolute;
+    width: 1px; height: 1px;
+    margin: -1px; padding: 0;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+.about {
+    width: min(860px, 100%);
+    margin: 0 auto;
+    padding: 56px 24px 72px;
+    text-align: left;
+    color: var(--muted);
+    font-size: 14px;
+    line-height: 1.9;
+}
+.about h2 { margin: 0 0 12px; color: var(--text); font-size: 18px; }
+.about h3 { margin: 28px 0 6px; color: var(--text); font-size: 15px; }
+.about p { margin: 0 0 10px; }
+.about ul { margin: 0 0 10px; padding-left: 1.3em; }
+.about li { margin-bottom: 4px; }
 
 .layout {
     width: min(1200px, 100%);
@@ -537,7 +596,8 @@ body.dark-mode.palette-amber  { --primary: #fbbf24; --primary-light: #2f2410; }
 }
 
 @media (max-width: 720px) {
-    body { padding: 6px 8px; }
+    .app-screen { padding: 6px 8px; }
+    .about { padding: 40px 16px 56px; }
     .layout {
         grid-template-columns: 1fr;
         grid-template-rows: minmax(0, 1fr) auto;
@@ -581,11 +641,13 @@ body.dark-mode.palette-amber  { --primary: #fbbf24; --primary-light: #2f2410; }
 </style>
 </head>
 <body>
+<div class="app-screen">
 <div class="layout" id="mainLayout">
     <div class="main-area">
         <header class="top-header">
             <div class="logo-container">
-                <img id="logoImg" src="logo.png" alt="Typedia">
+                <img id="logoImg" src="logo.png" alt="Typedia（タイペディア）">
+                <h1 class="visually-hidden">Typedia（タイペディア）｜実用的なタイピングを永遠に</h1>
             </div>
             <div class="appearance-controls">
                 <label class="palette-control" for="paletteSelect">カラー
@@ -674,6 +736,36 @@ body.dark-mode.palette-amber  { --primary: #fbbf24; --primary-light: #2f2410; }
         </div>
     </aside>
 </div>
+</div>
+
+<section class="about" id="about" aria-label="Typedia（タイペディア）について">
+    <h2>Typedia（タイペディア）とは：実用的なタイピングを永遠に</h2>
+    <p>Typedia（タイペディア）は、「実用的なタイピングを永遠に」をコンセプトにした日本語タイピング練習サイトです。Wikipedia（ウィキペディア）の文章から作った約600題の出題文が、ランダムに次々と出題されます。全問を終えると、また最初から並べ替えて出題されるため、いつまでも練習を続けられます。</p>
+
+    <h3>変換も、打ち間違いの修正も含めた実用的なタイピング</h3>
+    <p>ローマ字やかなを打って漢字に変換し、確定する。間違えたら文字を消して打ち直す。普段の日本語入力で当たり前に行うこれらの作業が、すべて練習に含まれます。英単語やかな文字だけを打つ練習とは違い、文章作成やチャット、メール、レポートなど、実際の入力に近い形で上達できます。</p>
+
+    <h3>打鍵速度の最高記録とランク</h3>
+    <p>速度は、直近10秒の1秒あたりの打鍵数（打/秒）で測ります。最高記録は自動で保存され、ブロンズ級からアルティメット級までのランクで確認できます。最高記録を更新した問題は丸ごと保存され、「ベスト記録をリプレイ」で、入力の様子を後から見返せます。</p>
+    <ul>
+        <li>ブロンズ級：1.0 打/秒未満</li>
+        <li>シルバー級：1.0 打/秒以上</li>
+        <li>ゴールド級：2.0 打/秒以上</li>
+        <li>プラチナ級：3.0 打/秒以上</li>
+        <li>マスター級：5.0 打/秒以上</li>
+        <li>アルティメット級：10.0 打/秒以上</li>
+    </ul>
+
+    <h3>使い方</h3>
+    <ul>
+        <li>表示された文章を、そのまま入力欄に入力します。正解すると、次の問題へ進みます。</li>
+        <li>入力文のどこかに「スキップ」と入力すると、その問題を記録せずに飛ばせます。</li>
+        <li>カラーは5色から選べ、ダークモードと、文字サイズの変更にも対応しています。</li>
+        <li>会員登録は不要です。記録はお使いのブラウザに保存されます。</li>
+    </ul>
+
+    <p>出題文は、フリー百科事典『ウィキペディア（Wikipedia）』を出典としています。</p>
+</section>
 
 <div class="replay-overlay" id="replayOverlay" role="dialog" aria-modal="true" aria-label="ベスト記録のリプレイ">
     <div class="replay-panel">
